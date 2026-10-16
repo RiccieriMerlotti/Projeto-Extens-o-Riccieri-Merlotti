@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgroHub - Modelagem de Agrofloresta</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style_basico.css">
+</head>
+<body class="pagina-construcao">
+
+    <!-- MENU DE NAVEGAÇÃO SUPERIOR -->
+    <header class="topo-nav">
+        <div class="logo-area">
+            <i class="fa-solid fa-seedling"></i>
+            <span>AgroHub <small>IFC Camboriú</small></span>
+        </div>
+        <div class="nav-botoes">
+            <a href="index.html"><i class="fa-solid fa-folder-open"></i> Meus Projetos</a>
+            <a href="projeto.html" class="ativo"><i class="fa-solid fa-hammer"></i> Construção / Modelagem</a>
+        </div>
+    </header>
+
+    <main class="main-container flex-col">
+        <div class="construcao-wrapper">
+            <!-- Barra Lateral Esquerda (Proporção Exata da Imagem) -->
+            <aside class="ferramentas-sidebar-img">
+                <div class="sidebar-top-box">
+                    <input type="text" placeholder="" class="mini-search">
+                    <i class="fa-solid fa-search"></i>
+                </div>
+                <div class="ferramenta-icone-img active" title="Ferramenta de Seleção">
+                    <i class="fa-solid fa-arrow-pointer"></i>
+                </div>
+                <div class="ferramenta-bloco-img" title="Criação e Modelagem de Terreno">
+                    <div class="img-mini-terreno">🚜</div>
+                    <span>Terreno</span>
+                </div>
+                <div class="ferramenta-icone-img" title="Pincel / Canteiros">
+                    <i class="fa-solid fa-paintbrush"></i>
+                </div>
+            </aside>
+
+            <!-- Área Central de Canteiros -->
+            <div class="canvas-central">
+                <div class="canteiros-container">
+                    <div class="canteiro">
+                        <div class="ponto-slot yellow" data-estrato="medio" onclick="plantarSlot(this)" title="Espaço Vago (Médio)"></div>
+                        <div class="ponto-slot blue" data-estrato="baixo" onclick="plantarSlot(this)" title="Espaço Vago (Baixo)"></div>
+                        <div class="ponto-slot yellow" data-estrato="medio" onclick="plantarSlot(this)" title="Espaço Vago (Médio)"></div>
+                        <div class="ponto-slot blue" data-estrato="baixo" onclick="plantarSlot(this)" title="Espaço Vago (Baixo)"></div>
+                        <div class="ponto-slot yellow" data-estrato="medio" onclick="plantarSlot(this)" title="Espaço Vago (Médio)"></div>
+                    </div>
+                    <div class="canteiro">
+                        <div class="ponto-slot red" data-estrato="emergente" onclick="plantarSlot(this)" title="Espaço Vago (Emergente)"></div>
+                        <div class="ponto-slot blue" data-estrato="baixo" onclick="plantarSlot(this)" title="Espaço Vago (Baixo)"></div>
+                        <div class="ponto-slot red" data-estrato="emergente" onclick="plantarSlot(this)" title="Espaço Vago (Emergente)"></div>
+                        <div class="ponto-slot blue" data-estrato="baixo" onclick="plantarSlot(this)" title="Espaço Vago (Baixo)"></div>
+                        <div class="ponto-slot red" data-estrato="emergente" onclick="plantarSlot(this)" title="Espaço Vago (Emergente)"></div>
+                    </div>
+                    <div class="canteiro">
+                        <div class="ponto-slot orange" data-estrato="alto" onclick="plantarSlot(this)" title="Espaço Vago (Estrato Alto)"></div>
+                        <div class="ponto-slot blue" data-estrato="baixo" onclick="plantarSlot(this)" title="Espaço Vago (Baixo)"></div>
+                        <div class="ponto-slot orange" data-estrato="alto" onclick="plantarSlot(this)" title="Espaço Vago (Estrato Alto)"></div>
+                        <div class="ponto-slot yellow" data-estrato="medio" onclick="plantarSlot(this)" title="Espaço Vago (Médio)"></div>
+                        <div class="ponto-slot orange" data-estrato="alto" onclick="plantarSlot(this)" title="Espaço Vago (Estrato Alto)"></div>
+                    </div>
+                    <div class="canteiro">
+                        <div class="ponto-slot yellow" data-estrato="medio" onclick="plantarSlot(this)" title="Espaço Vago (Médio)"></div>
+                        <div class="ponto-slot blue" data-estrato="baixo" onclick="plantarSlot(this)" title="Espaço Vago (Baixo)"></div>
+                        <div class="ponto-slot yellow" data-estrato="medio" onclick="plantarSlot(this)" title="Espaço Vago (Médio)"></div>
+                        <div class="ponto-slot blue" data-estrato="baixo" onclick="plantarSlot(this)" title="Espaço Vago (Baixo)"></div>
+                        <div class="ponto-slot yellow" data-estrato="medio" onclick="plantarSlot(this)" title="Espaço Vago (Médio)"></div>
+                    </div>
+                </div>
+
+                <div class="aviso-automacao">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i> Clique numa planta abaixo e escolha um espaço compatível no canteiro.
+                </div>
+            </div>
+        </div>
+
+        <!-- Rodapé / Catálogo com Divisões de Estrato e Navegação por Seta -->
+        <footer class="catalogo-footer-img">
+            <div class="catalogo-header-img">
+                <div class="busca-esquerda">
+                    <input type="text" placeholder="Buscar Planta...">
+                    <i class="fa-solid fa-search"></i>
+                </div>
+                <div class="estrato-secao-titulo">
+                    <span>emergente <span class="dot red"></span></span>
+                </div>
+                <div class="estrato-secao-titulo">
+                    <span>Estrato_alto <span class="dot orange"></span> Médio <span class="dot yellow"></span></span>
+                </div>
+                <div class="estrato-secao-titulo">
+                    <span>Baixo <span class="dot blue"></span></span>
+                </div>
+            </div>
+
+            <!-- Lista de Plantas Detalhadas com Carrossel por Seta -->
+            <div class="catalogo-corpo-grid" id="container-catalogo">
+                <!-- Emergente 1 -->
+                <div class="planta-card-detalhe" data-estrato="emergente" data-nome="Euterpe edulis (Açaí) - Emergente" onclick="selecionarPlanta(this)">
+                    <div class="planta-mini-img">🌴</div>
+                    <div class="planta-desc-txt">
+                        <strong>Planta_1</strong>
+                        <p>Euterpe edulis (Açaí) - Emergente, Palmito</p>
+                    </div>
+                </div>
+                <!-- Emergente 2 -->
+                <div class="planta-card-detalhe" data-estrato="emergente" data-nome="Euterpe edulis (Açaí 2) - Emergente" onclick="selecionarPlanta(this)">
+                    <div class="planta-mini-img">🌿</div>
+                    <div class="planta-desc-txt">
+                        <strong>Planta_2</strong>
+                        <p>Euterpe edulis - Emergente, Palmito</p>
+                    </div>
+                </div>
+                <!-- Estrato Alto 1 -->
+                <div class="planta-card-detalhe" data-estrato="alto" data-nome="Euterpe edulis ((médio)) - Estrato Alto" onclick="selecionarPlanta(this)">
+                    <div class="planta-mini-img">🌳</div>
+                    <div class="planta-desc-txt">
+                        <strong>Planta_3</strong>
+                        <p>Euterpe edulis (médio) - Emergente, Palmito</p>
+                    </div>
+                </div>
+                <!-- Estrato Alto 2 -->
+                <div class="planta-card-detalhe" data-estrato="alto" data-nome="Pamvalta (Pawels) - Estrato Alto" onclick="selecionarPlanta(this)">
+                    <div class="planta-mini-img">🪴</div>
+                    <div class="planta-desc-txt">
+                        <strong>Planta_4</strong>
+                        <p>Pamvalta (Pawels) - Emergente, Palmito</p>
+                    </div>
+                </div>
+                <!-- Médio 1 -->
+                <div class="planta-card-detalhe" data-estrato="medio" data-nome="Bamplaioantis (Baiion) - Médio" onclick="selecionarPlanta(this)">
+                    <div class="planta-mini-img">🌾</div>
+                    <div class="planta-desc-txt">
+                        <strong>Planta_5</strong>
+                        <p>Bamplaioantis (Baiion) - Emergente, Palmito</p>
+                    </div>
+                </div>
+                <!-- Médio 2 -->
+                <div class="planta-card-detalhe" data-estrato="medio" data-nome="Planta Auxiliar - Médio" onclick="selecionarPlanta(this)">
+                    <div class="planta-mini-img">🌱</div>
+                    <div class="planta-desc-txt">
+                        <strong>Planta_6</strong>
+                        <p>Espécie Auxiliar - Médio</p>
+                    </div>
+                </div>
+                <!-- Baixo 1 -->
+                <div class="planta-card-detalhe" data-estrato="baixo" data-nome="Cobertura Solo - Baixo" onclick="selecionarPlanta(this)">
+                    <div class="planta-mini-img">🌿</div>
+                    <div class="planta-desc-txt">
+                        <strong>Planta_7</strong>
+                        <p>Cobertura de Solo - Baixo</p>
+                    </div>
+                </div>
+
+                <!-- Botão de Seta para navegar lateralmente -->
+                <div class="seta-proximo-catalogo" onclick="rolarCatalogo()" title="Ver mais plantas">
+                    <i class="fa-solid fa-arrow-right"></i>
+                </div>
+            </div>
+        </footer>
+    </main>
+
+    <!-- SCRIPT DE INTERAÇÃO -->
+    <script>
+        let plantaSelecionada = null;
+
+        function selecionarPlanta(elemento) {
+            document.querySelectorAll('.planta-card-detalhe').forEach(c => c.style.border = '1px solid #333');
+            
+            plantaSelecionada = {
+                estrato: elemento.getAttribute('data-estrato'),
+                nome: elemento.getAttribute('data-nome')
+            };
+
+            elemento.style.border = '2px solid #059669';
+        }
+
+        function plantarSlot(slot) {
+            if (!plantaSelecionada) {
+                alert("Selecione uma planta na barra inferior primeiro!");
+                return;
+            }
+
+            const estratoSlot = slot.getAttribute('data-estrato');
+            if (estratoSlot !== plantaSelecionada.estrato) {
+                alert(`Incompatível! Este espaço é para o estrato [${estratoSlot.toUpperCase()}].`);
+                return;
+            }
+
+            slot.classList.add('ocupado');
+            slot.setAttribute('title', `Plantado: ${plantaSelecionada.nome}`);
+            slot.style.backgroundColor = '#059669';
+            slot.style.boxShadow = '0 0 8px #34d399';
+
+            document.querySelectorAll('.planta-card-detalhe').forEach(c => c.style.border = '1px solid #333');
+            plantaSelecionada = null;
+        }
+
+        function rolarCatalogo() {
+            const container = document.getElementById('container-catalogo');
+            container.scrollBy({ left: 250, behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgroHub - Modelagem com Legenda e Controles de Exibição</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style_basico.css">
+</head>
+<body class="pagina-construcao">
+
+    <!-- MENU DE NAVEGAÇÃO SUPERIOR -->
+    <header class="topo-nav">
+        <div class="logo-area">
+            <i class="fa-solid fa-seedling"></i>
+            <span>AgroHub <small>IFC Camboriú</small></span>
+        </div>
+        <div class="nav-botoes">
+            <a href="index.html"><i class="fa-solid fa-folder-open"></i> Meus Projetos</a>
+            <a href="projeto.html" class="ativo"><i class="fa-solid fa-hammer"></i> Construção / Modelagem</a>
+        </div>
+    </header>
+
+    <main class="main-container flex-col">
+        <div class="construcao-wrapper">
+            
+            <!-- BARRA LATERAL DE FERRAMENTAS -->
+            <aside class="ferramentas-sidebar-avancada">
+                <div class="sidebar-search-box">
+                    <input type="text" placeholder="Buscar..." id="input-busca-ferramenta">
+                    <i class="fa-solid fa-search"></i>
+                </div>
+
+                <!-- SELETOR DE FOCO DO SAF -->
+                <div class="ferramenta-escala-box">
+                    <span class="escala-titulo"><i class="fa-solid fa-wheat-awn"></i> Foco do SAF</span>
+                    <select id="seletor-foco-saf" class="seletor-foco-input" onchange="atualizarFocoProducao()">
+                        <option value="hortalicas">Hortaliças (4m)</option>
+                        <option value="frutiferas" selected>Frutíferas (5m)</option>
+                        <option value="madeireiras">Madeireiras (6m)</option>
+                    </select>
+                </div>
+
+                <!-- FERRAMENTA 1: DEFINIR TERRENO -->
+                <button class="btn-ferramenta active" id="btn-ferramenta-terreno" title="Ferramenta de seleção de área" onclick="definirModo('terreno')">
+                    <div class="img-mini-terreno">🚜</div>
+                    <span>Definir Terreno</span>
+                </button>
+
+                <!-- FERRAMENTA 2: MOVER CAMPO -->
+                <button class="btn-ferramenta" id="btn-ferramenta-mover" title="Mover e navegar pelo campo" onclick="definirModo('mover')">
+                    <i class="fa-solid fa-hand"></i>
+                    <span>Mover Campo</span>
+                </button>
+
+                <!-- GERAR CANTEIROS -->
+                <button class="btn-ferramenta" id="btn-ferramenta-gerar" title="Gerar canteiros" onclick="gerarCanteirosCalculados()">
+                    <i class="fa-solid fa-calculator"></i>
+                    <span>Gerar Canteiros</span>
+                </button>
+
+                <!-- BOTÃO PARA EXIBIR / OCULTAR LEGENDA E MEDIDAS -->
+                <button class="btn-ferramenta" id="btn-ferramenta-rotulos" title="Alternar visibilidade das legendas e medidas" onclick="alternarVisibilidadeRotulos()">
+                    <i class="fa-solid fa-eye-slash" id="icone-btn-rotulos"></i>
+                    <span id="txt-btn-rotulos">Ocultar Rótulos</span>
+                </button>
+
+                <!-- FERRAMENTAS DE ZOOM -->
+                <div class="ferramenta-escala-box">
+                    <span class="escala-titulo"><i class="fa-solid fa-magnifying-glass"></i> Zoom</span>
+                    <div class="escala-botoes-grid">
+                        <button class="escala-opt" onclick="ajustarZoom(0.1)">+</button>
+                        <button class="escala-opt" onclick="ajustarZoom(-0.1)">-</button>
+                    </div>
+                </div>
+
+                <!-- ESCALONAMENTO (m / Km) -->
+                <div class="ferramenta-escala-box">
+                    <span class="escala-titulo"><i class="fa-solid fa-ruler-combined"></i> Unidade</span>
+                    <div class="escala-botoes-grid">
+                        <button id="btn-escala-m" class="escala-opt ativo" onclick="mudarEscala('m')">m</button>
+                        <button id="btn-escala-km" class="escala-opt" onclick="mudarEscala('Km')">Km</button>
+                    </div>
+                </div>
+
+                <button class="btn-ferramenta" id="btn-ferramenta-limpar" title="Limpar área" onclick="limparArea()">
+                    <i class="fa-solid fa-rotate-left"></i>
+                    <span>Limpar Área</span>
+                </button>
+            </aside>
+
+            <!-- ÁREA DE TRABALHO DO TERRENO -->
+            <div class="canvas-central-terreno" id="viewport-terreno" 
+                 onmousedown="iniciarAcaoMouse(event)" 
+                 onmousemove="moverAcaoMouse(event)" 
+                 onmouseup="finalizarAcaoMouse()">
+                
+                <!-- PAINEL DE LEGENDA DO CANTO SUPERIOR DIREITO -->
+                <div class="painel-legenda-superior-direito" id="painel-legenda-sup-dir">
+                    <div class="legenda-titulo-header">
+                        <i class="fa-solid fa-layer-group"></i> Legenda do SAF
+                    </div>
+                    <div class="legenda-secao">
+                        <strong>Tipos de Plantas (Estratos)</strong>
+                        <div class="legenda-item"><span class="dot red"></span> Emergente (20%)</div>
+                        <div class="legenda-item"><span class="dot orange"></span> Alto (40%)</div>
+                        <div class="legenda-item"><span class="dot yellow"></span> Médio (60%)</div>
+                        <div class="legenda-item"><span class="dot blue"></span> Baixo (80%)</div>
+                    </div>
+                    <div class="legenda-secao">
+                        <strong>Tipos de Canteiros</strong>
+                        <div class="legenda-item"><span class="box-legenda principal"></span> Linha Principal (0.8m)</div>
+                        <div class="legenda-item"><span class="box-legenda secundario"></span> Canteiro Secundário (0.75m)</div>
+                        <div class="legenda-item"><span class="box-legenda caminho"></span> Caminho / Espaço (35cm)</div>
+                    </div>
+                </div>
+
+                <div class="container-plano-terreno" id="plano-terreno">
+                    
+                    <!-- Retângulo de Seleção Paint -->
+                    <div id="retangulo-paint" class="retangulo-selecao-paint" style="display: none;">
+                        <div class="medida-borda medida-topo elemento-rotulo" id="medida-largura-topo">Largura: --</div>
+                        <div class="medida-borda medida-lateral elemento-rotulo" id="medida-altura-lateral">Comprimento: --</div>
+                    </div>
+
+                    <!-- Canteiros Gerados -->
+                    <div id="area-canteiros-gerados" class="canteiros-gerados-wrapper" style="display: none;">
+                        <!-- Rótulos colados ao lado da seleção de canteiros -->
+                        <div class="medida-borda medida-topo elemento-rotulo" id="canteiro-medida-largura">Largura: --</div>
+                        <div class="medida-borda medida-lateral elemento-rotulo" id="canteiro-medida-comprimento">Comprimento: --</div>
+                    </div>
+                </div>
+
+                <!-- PAINEL DE STATUS FIXADO À DIREITA (~12cm) -->
+                <div class="painel-status-direita" id="label-escala-terreno">
+                    <i class="fa-solid fa-circle-info"></i>
+                    <span>Selecione a área no terreno. Clique em 'Ocultar Rótulos' na barra lateral para esconder as legendas e medidas.</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- BARRA INFERIOR DE PLANTAS -->
+        <footer class="catalogo-footer-img">
+            <div class="catalogo-header-img">
+                <div class="busca-esquerda">
+                    <input type="text" placeholder="Buscar Planta..." id="busca-planta-inferior" oninput="filtrarPlantasInferior()">
+                    <i class="fa-solid fa-search"></i>
+                </div>
+                <div class="estrato-secao-titulo"><span>Emergente (20%) <span class="dot red"></span></span></div>
+                <div class="estrato-secao-titulo"><span>Alto (40%) <span class="dot orange"></span></span></div>
+                <div class="estrato-secao-titulo"><span>Médio (60%) <span class="dot yellow"></span></span></div>
+                <div class="estrato-secao-titulo"><span>Baixo (80%) <span class="dot blue"></span></span></div>
+            </div>
+
+            <div class="catalogo-corpo-grid" id="container-catalogo-plantas">
+                <div class="planta-card-detalhe" data-estrato="emergente" data-nome="Euterpe edulis (Açaí)" data-codigo="EM-01" onclick="selecionarPlantaCatalogo(this)">
+                    <div class="planta-mini-img">🌴</div>
+                    <div class="planta-desc-txt"><strong>Planta_1</strong><p>Açaí - Emergente</p></div>
+                </div>
+                <div class="planta-card-detalhe" data-estrato="emergente" data-nome="Cedro Rosa" data-codigo="EM-02" onclick="selecionarPlantaCatalogo(this)">
+                    <div class="planta-mini-img">🌿</div>
+                    <div class="planta-desc-txt"><strong>Planta_2</strong><p>Cedro - Emergente</p></div>
+                </div>
+                <div class="planta-card-detalhe" data-estrato="alto" data-nome="Bananeira Prata" data-codigo="AL-01" onclick="selecionarPlantaCatalogo(this)">
+                    <div class="planta-mini-img">🌳</div>
+                    <div class="planta-desc-txt"><strong>Planta_3</strong><p>Bananeira - Alto</p></div>
+                </div>
+                <div class="planta-card-detalhe" data-estrato="alto" data-nome="Goiabeira" data-codigo="AL-02" onclick="selecionarPlantaCatalogo(this)">
+                    <div class="planta-mini-img">🪴</div>
+                    <div class="planta-desc-txt"><strong>Planta_4</strong><p>Goiabeira - Alto</p></div>
+                </div>
+                <div class="planta-card-detalhe" data-estrato="medio" data-nome="Palmito Pupunha" data-codigo="MD-01" onclick="selecionarPlantaCatalogo(this)">
+                    <div class="planta-mini-img">🌾</div>
+                    <div class="planta-desc-txt"><strong>Planta_5</strong><p>Pupunha - Médio</p></div>
+                </div>
+                <div class="planta-card-detalhe" data-estrato="medio" data-nome="Café Arábica" data-codigo="MD-02" onclick="selecionarPlantaCatalogo(this)">
+                    <div class="planta-mini-img">🌱</div>
+                    <div class="planta-desc-txt"><strong>Planta_6</strong><p>Café - Médio</p></div>
+                </div>
+                <div class="planta-card-detalhe" data-estrato="baixo" data-nome="Feijão Guandu" data-codigo="BX-01" onclick="selecionarPlantaCatalogo(this)">
+                    <div class="planta-mini-img">🌿</div>
+                    <div class="planta-desc-txt"><strong>Planta_7</strong><p>Guandu - Baixo</p></div>
+                </div>
+
+                <div class="seta-proximo-catalogo" onclick="rolarCatalogo()" title="Ver mais plantas">
+                    <i class="fa-solid fa-arrow-right"></i>
+                </div>
+            </div>
+        </footer>
+    </main>
+
+    <!-- SCRIPT DE LÓGICA E INTERAÇÃO -->
+    <script>
+        let modoAtual = 'terreno';
+        let unidadeEscala = 'm';
+        let distLinhaPrincipalMetros = 5.0;
+        let nivelZoom = 1.0;
+        let rotulosVisiveis = true; // Controle de exibição
+        
+        let movendoCampo = false;
+        let inicioPanX = 0, inicioPanY = 0;
+        let deslocamentoX = 0, deslocamentoY = 0;
+
+        let desenhando = false;
+        let inicioX = 0, inicioY = 0;
+        let areaSelecionada = { x: 0, y: 0, largura: 0, altura: 0 };
+        let areaDefinida = false;
+        let canteirosGerados = false;
+        let plantaSelecionada = null;
+
+        const METROS_POR_PX = 1 / 40; 
+        const KM_POR_PX = Math.sqrt(0.5) / 40; 
+
+        function definirModo(modo) {
+            modoAtual = modo;
+            document.querySelectorAll('.btn-ferramenta').forEach(d => d.classList.remove('active'));
+            const viewport = document.getElementById('viewport-terreno');
+
+            if (modo === 'terreno') {
+                document.getElementById('btn-ferramenta-terreno').classList.add('active');
+                viewport.style.cursor = 'crosshair';
+                atualizarPainel('Modo Terreno: Arraste o mouse para selecionar o terreno.');
+            } else if (modo === 'mover') {
+                document.getElementById('btn-ferramenta-mover').classList.add('active');
+                viewport.style.cursor = 'grab';
+                atualizarPainel('Modo Mover: Arraste para navegar pelo campo.');
+            }
+        }
+
+        function alternarVisibilidadeRotulos() {
+            rotulosVisiveis = !rotulosVisiveis;
+            
+            const icone = document.getElementById('icone-btn-rotulos');
+            const txt = document.getElementById('txt-btn-rotulos');
+            const legendaSupDir = document.getElementById('painel-legenda-sup-dir');
+            const elementosRotulo = document.querySelectorAll('.elemento-rotulo, .info-medida-canteiro, .info-medida-caminho');
+
+            if (rotulosVisiveis) {
+                icone.className = 'fa-solid fa-eye-slash';
+                txt.innerText = 'Ocultar Rótulos';
+                legendaSupDir.style.display = 'block';
+                elementosRotulo.forEach(el => el.style.display = 'block');
+            } else {
+                icone.className = 'fa-solid fa-eye';
+                txt.innerText = 'Exibir Rótulos';
+                legendaSupDir.style.display = 'none';
+                elementosRotulo.forEach(el => el.style.display = 'none');
+            }
+        }
+
+        function atualizarPainel(texto) {
+            document.getElementById('label-escala-terreno').innerHTML = `
+                <i class="fa-solid fa-circle-info"></i>
+                <span>${texto}</span>
+            `;
+        }
+
+        function ajustarZoom(delta) {
+            nivelZoom = Math.max(0.5, Math.min(2.5, nivelZoom + delta));
+            aplicarTransformacaoCampo();
+        }
+
+        function aplicarTransformacaoCampo() {
+            const plano = document.getElementById('plano-terreno');
+            plano.style.transform = `translate(${deslocamentoX}px, ${deslocamentoY}px) scale(${nivelZoom})`;
+        }
+
+        function iniciarAcaoMouse(e) {
+            if (modoAtual === 'mover' || e.button === 2 || e.altKey) {
+                movendoCampo = true;
+                inicioPanX = e.clientX - deslocamentoX;
+                inicioPanY = e.clientY - deslocamentoY;
+                document.getElementById('viewport-terreno').style.cursor = 'grabbing';
+                e.preventDefault();
+            } else if (modoAtual === 'terreno' && !canteirosGerados) {
+                const plano = document.getElementById('plano-terreno');
+                const rect = plano.getBoundingClientRect();
+                
+                desenhando = true;
+                inicioX = (e.clientX - rect.left) / nivelZoom;
+                inicioY = (e.clientY - rect.top) / nivelZoom;
+
+                const retangulo = document.getElementById('retangulo-paint');
+                retangulo.style.display = 'block';
+                retangulo.style.left = `${inicioX}px`;
+                retangulo.style.top = `${inicioY}px`;
+                retangulo.style.width = `0px`;
+                retangulo.style.height = `0px`;
+                areaDefinida = false;
+            }
+        }
+
+        function moverAcaoMouse(e) {
+            if (movendoCampo) {
+                deslocamentoX = e.clientX - inicioPanX;
+                deslocamentoY = e.clientY - inicioPanY;
+                aplicarTransformacaoCampo();
+            } else if (desenhando && modoAtual === 'terreno') {
+                const plano = document.getElementById('plano-terreno');
+                const rect = plano.getBoundingClientRect();
+                const atualX = (e.clientX - rect.left) / nivelZoom;
+                const atualY = (e.clientY - rect.top) / nivelZoom;
+
+                const largura = atualX - inicioX;
+                const altura = atualY - inicioY;
+
+                const xFinal = largura < 0 ? atualX : inicioX;
+                const yFinal = altura < 0 ? atualY : inicioY;
+                const absLargura = Math.abs(largura);
+                const absAltura = Math.abs(altura);
+
+                const retangulo = document.getElementById('retangulo-paint');
+                retangulo.style.left = `${xFinal}px`;
+                retangulo.style.top = `${yFinal}px`;
+                retangulo.style.width = `${absLargura}px`;
+                retangulo.style.height = `${absAltura}px`;
+
+                areaSelecionada = { x: xFinal, y: yFinal, largura: absLargura, altura: absAltura };
+
+                const fatorDimensao = unidadeEscala === 'm' ? METROS_POR_PX : KM_POR_PX;
+                const medidaW = (absLargura * fatorDimensao).toFixed(1);
+                const medidaH = (absAltura * fatorDimensao).toFixed(1);
+
+                document.getElementById('medida-largura-topo').innerText = `Largura: ${medidaW} ${unidadeEscala}`;
+                document.getElementById('medida-altura-lateral').innerText = `Comprimento: ${medidaH} ${unidadeEscala}`;
+            }
+        }
+
+        function finalizarAcaoMouse() {
+            if (movendoCampo) {
+                movendoCampo = false;
+                document.getElementById('viewport-terreno').style.cursor = modoAtual === 'mover' ? 'grab' : 'crosshair';
+            }
+            if (desenhando) {
+                desenhando = false;
+                if (areaSelecionada.largura > 10 && areaSelecionada.altura > 10) {
+                    areaDefinida = true;
+                    const fatorDimensao = unidadeEscala === 'm' ? METROS_POR_PX : KM_POR_PX;
+                    const w = (areaSelecionada.largura * fatorDimensao).toFixed(1);
+                    const h = (areaSelecionada.altura * fatorDimensao).toFixed(1);
+                    atualizarPainel(`Área delimitada: Largura ${w}${unidadeEscala} x Comprimento ${h}${unidadeEscala}. Clique em 'Gerar Canteiros'.`);
+                }
+            }
+        }
+
+        function atualizarFocoProducao() {
+            const foco = document.getElementById('seletor-foco-saf').value;
+            if (foco === 'hortalicas') distLinhaPrincipalMetros = 4.0;
+            else if (foco === 'frutiferas') distLinhaPrincipalMetros = 5.0;
+            else if (foco === 'madeireiras') distLinhaPrincipalMetros = 6.0;
+        }
+
+        function mudarEscala(unidade) {
+            unidadeEscala = unidade;
+            document.getElementById('btn-escala-m').classList.remove('ativo');
+            document.getElementById('btn-escala-km').classList.remove('ativo');
+            const plano = document.getElementById('plano-terreno');
+
+            if (unidade === 'm') {
+                document.getElementById('btn-escala-m').classList.add('ativo');
+                plano.style.backgroundSize = '40px 40px';
+                atualizarPainel("Escala: Metros (1m² / quadrado).");
+            } else {
+                document.getElementById('btn-escala-km').classList.add('ativo');
+                plano.style.backgroundSize = '40px 40px';
+                atualizarPainel("Escala: Quilômetros (0,5km² / quadrado).");
+            }
+        }
+
+        function gerarCanteirosCalculados() {
+            if (!areaDefinida) {
+                alert("Selecione primeiro uma área no terreno arrastando o mouse!");
+                return;
+            }
+
+            const larguraMetros = unidadeEscala === 'm' ? areaSelecionada.largura * METROS_POR_PX : areaSelecionada.largura * KM_POR_PX * 1000;
+            const alturaMetros = unidadeEscala === 'm' ? areaSelecionada.altura * METROS_POR_PX : areaSelecionada.altura * KM_POR_PX * 1000;
+            const areaTotalM2 = larguraMetros * alturaMetros;
+
+            if (areaTotalM2 < 16) {
+                atualizarPainel("⚠️ Área menor que 16m²! Insuficiente para criar uma Agrofloresta viável.");
+                alert("Espaço insuficiente! A área deve ter no mínimo 16m².");
+                return;
+            }
+
+            canteirosGerados = true;
+            const containerCanteiros = document.getElementById('area-canteiros-gerados');
+            
+            containerCanteiros.style.left = `${areaSelecionada.x}px`;
+            containerCanteiros.style.top = `${areaSelecionada.y}px`;
+            containerCanteiros.style.width = `${areaSelecionada.largura}px`;
+            containerCanteiros.style.height = `${areaSelecionada.altura}px`;
+            containerCanteiros.style.display = 'flex';
+
+            // Atualiza os rótulos de medida colados à área de canteiros
+            document.getElementById('canteiro-medida-largura').innerText = `Largura: ${larguraMetros.toFixed(1)} ${unidadeEscala}`;
+            document.getElementById('canteiro-medida-comprimento').innerText = `Comprimento: ${alturaMetros.toFixed(1)} ${unidadeEscala}`;
+
+            const larguraTotal = areaSelecionada.largura - 10;
+            const alturaTotal = areaSelecionada.altura - 10;
+
+            const numColunas = Math.max(2, Math.floor(larguraTotal / 50));
+            const slotsVerticais = Math.max(4, Math.floor(alturaTotal / 38));
+
+            let matrizCores = Array(numColunas).fill(null).map(() => Array(slotsVerticais).fill('blue'));
+            const padraoMain = ['red', 'orange', 'yellow', 'orange', 'yellow', 'orange'];
+            const padraoSec  = ['yellow', 'blue', 'blue', 'yellow', 'blue', 'blue'];
+
+            let totalPlantas = 0;
+
+            for (let col = 0; col < numColunas; col++) {
+                const eColunaPrincipal = (col % 2 === 0);
+                for (let row = 0; row < slotsVerticais; row++) {
+                    if (eColunaPrincipal) {
+                        let corSugerida = padraoMain[(col * 2 + row * 3) % padraoMain.length];
+                        if (corSugerida === 'red') {
+                            let temEmergenteVizinho = false;
+                            for (let dc = -1; dc <= 1; dc++) {
+                                for (let dr = -1; dr <= 1; dr++) {
+                                    if (dc === 0 && dr === 0) continue;
+                                    const cVizinho = col + dc;
+                                    const rVizinho = row + dr;
+                                    if (cVizinho >= 0 && cVizinho < numColunas && rVizinho >= 0 && rVizinho < slotsVerticais) {
+                                        if (matrizCores[cVizinho][rVizinho] === 'red') {
+                                            temEmergenteVizinho = true;
+                                            break;
+                                        }
+                                    }
+                                }
+                                if (temEmergenteVizinho) break;
+                            }
+                            if (temEmergenteVizinho) corSugerida = 'orange';
+                        }
+                        matrizCores[col][row] = corSugerida;
+                    } else {
+                        matrizCores[col][row] = padraoSec[(col + row * 2) % padraoSec.length];
+                    }
+                }
+            }
+
+            // Preserva as divs estáticas dos rótulos e anexa o conteúdo gerado
+            let htmlModulos = `
+                <div class="medida-borda medida-topo elemento-rotulo" id="canteiro-medida-largura">Largura: ${larguraMetros.toFixed(1)} ${unidadeEscala}</div>
+                <div class="medida-borda medida-lateral elemento-rotulo" id="canteiro-medida-comprimento">Comprimento: ${alturaMetros.toFixed(1)} ${unidadeEscala}</div>
+            `;
+
+            for (let col = 0; col < numColunas; col++) {
+                const eColunaPrincipal = (col % 2 === 0);
+
+                if (eColunaPrincipal) {
+                    htmlModulos += `
+                        <div class="canteiro-coluna canteiro-principal" title="Linha Principal (Largura: 0.8m | Comp: ${alturaMetros.toFixed(1)}m)">
+                            <span class="info-medida-canteiro">0.8m</span>
+                    `;
+                    for (let row = 0; row < slotsVerticais; row++) {
+                        const cor = matrizCores[col][row];
+                        const estrato = cor === 'red' ? 'emergente' : (cor === 'orange' ? 'alto' : (cor === 'yellow' ? 'medio' : 'baixo'));
+                        totalPlantas++;
+                        htmlModulos += `<div class="ponto-slot ${cor}" data-estrato="${estrato}" onclick="interagirSlot(event, this)" title="Espaço [${estrato.toUpperCase()}]"></div>`;
+                    }
+                    htmlModulos += `</div>`;
+                } else {
+                    htmlModulos += `
+                        <div class="caminho-circulacao" title="Caminho / Espaço entre canteiros (35cm)">
+                            <span class="info-medida-caminho">35cm</span>
+                        </div>
+                        <div class="canteiro-coluna canteiro-secundario" title="Canteiro Secundário (Largura: 0.75m | Comp: ${alturaMetros.toFixed(1)}m)">
+                            <span class="info-medida-canteiro">0.75m</span>
+                    `;
+                    for (let row = 0; row < slotsVerticais; row++) {
+                        const cor = matrizCores[col][row];
+                        const estrato = cor === 'yellow' ? 'medio' : 'baixo';
+                        totalPlantas++;
+                        htmlModulos += `<div class="ponto-slot ${cor}" data-estrato="${estrato}" onclick="interagirSlot(event, this)" title="Espaço [${estrato.toUpperCase()}]"></div>`;
+                    }
+                    htmlModulos += `</div>`;
+                    htmlModulos += `
+                        <div class="caminho-circulacao" title="Caminho / Espaço entre canteiros (35cm)">
+                            <span class="info-medida-caminho">35cm</span>
+                        </div>
+                    `;
+                }
+            }
+
+            containerCanteiros.innerHTML = htmlModulos;
+            document.getElementById('retangulo-paint').style.display = 'none';
+
+            // Garante o estado atual de exibição definido pelo botão
+            if (!rotulosVisiveis) {
+                document.querySelectorAll('.elemento-rotulo, .info-medida-canteiro, .info-medida-caminho').forEach(el => el.style.display = 'none');
+            }
+
+            atualizarPainel(`Layout gerado: ${totalPlantas} plantas com medidas coladas e legendas ativas.`);
+        }
+
+        function limparArea() {
+            areaDefinida = false;
+            canteirosGerados = false;
+            document.getElementById('retangulo-paint').style.display = 'none';
+            document.getElementById('area-canteiros-gerados').style.display = 'none';
+            document.getElementById('area-canteiros-gerados').innerHTML = '';
+            atualizarPainel("Área limpa. Selecione um novo terreno arrastando o mouse.");
+        }
+
+        function selecionarPlantaCatalogo(elemento) {
+            document.querySelectorAll('.planta-card-detalhe').forEach(c => c.style.border = '1px solid #333');
+            plantaSelecionada = {
+                estrato: elemento.getAttribute('data-estrato'),
+                nome: elemento.getAttribute('data-nome'),
+                codigo: elemento.getAttribute('data-codigo')
+            };
+            elemento.style.border = '2px solid #059669';
+        }
+
+        function interagirSlot(e, slot) {
+            e.stopPropagation();
+            if (!plantaSelecionada) {
+                alert("Selecione uma planta no catálogo inferior primeiro!");
+                return;
+            }
+
+            const estratoSlot = slot.getAttribute('data-estrato');
+            if (estratoSlot !== plantaSelecionada.estrato) {
+                alert(`Incompatível! Este espaço é para o estrato [${estratoSlot.toUpperCase()}].`);
+                return;
+            }
+
+            slot.classList.add('ocupado');
+            const infoTexto = `Nome: ${plantaSelecionada.nome} | Código: ${plantaSelecionada.codigo}`;
+            slot.setAttribute('data-info-ocupante', infoTexto);
+            slot.style.backgroundColor = '#059669';
+            slot.style.boxShadow = '0 0 8px #34d399';
+            plantaSelecionada = null;
+            document.querySelectorAll('.planta-card-detalhe').forEach(c => c.style.border = '1px solid #333');
+        }
+
+        function rolarCatalogo() {
+            document.getElementById('container-catalogo-plantas').scrollBy({ left: 250, behavior: 'smooth' });
+        }
+
+        function filtrarPlantasInferior() {
+            const termo = document.getElementById('busca-planta-inferior').value.toLowerCase();
+            document.querySelectorAll('.planta-card-detalhe').forEach(card => {
+                card.style.display = card.innerText.toLowerCase().includes(termo) ? 'flex' : 'none';
+            });
+        }
+    </script>
+</body>
+</html>

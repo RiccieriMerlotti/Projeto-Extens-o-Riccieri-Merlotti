@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgroHub - Meus Projetos</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style_basico.css">
+</head>
+<body class="pagina-selecao">
+
+    <!-- MENU DE NAVEGAÇÃO SUPERIOR -->
+    <header class="topo-nav">
+        <div class="logo-area">
+            <i class="fa-solid fa-seedling"></i>
+            <span>AgroHub <small>IFC Camboriú</small></span>
+        </div>
+        <div class="nav-botoes">
+            <a href="index.html" class="ativo"><i class="fa-solid fa-folder-open"></i> Meus Projetos</a>
+            <a href="projeto.html"><i class="fa-solid fa-hammer"></i> Construção / Modelagem</a>
+        </div>
+    </header>
+
+    <!-- CONTAINER PRINCIPAL (ESTILO DRIVE) -->
+    <main class="main-container-drive">
+        <!-- Barra Lateral Esquerda -->
+        <aside class="sidebar-drive">
+            <div class="sidebar-top">
+                <button onclick="abrirModalNovoProjeto()" class="btn-novo-drive">
+                    <i class="fa-solid fa-plus"></i> Novo
+                </button>
+                <nav class="sidebar-menu-drive">
+                    <a href="#" onclick="filtrarSecao('todos', event)" id="menu-meus" class="active"><i class="fa-solid fa-folder"></i><span>Meus Projetos</span></a>
+                    <a href="#" onclick="filtrarSecao('recentes', event)" id="menu-recentes"><i class="fa-solid fa-clock-rotate-left"></i><span>Recentes</span></a>
+                    <a href="#" onclick="filtrarSecao('configuracoes', event)" id="menu-configs"><i class="fa-solid fa-gear"></i><span>Configurações</span></a>
+                </nav>
+            </div>
+            <div class="sidebar-footer-drive">
+                IFC Campus Camboriú<br>BSI - Extensão II
+            </div>
+        </aside>
+
+        <!-- Conteúdo Principal à Direita -->
+        <div class="conteudo-drive">
+            <!-- Barra de Pesquisa Superior Estilo Drive -->
+            <div class="search-bar-drive">
+                <div class="search-box-drive">
+                    <i class="fa-solid fa-search"></i>
+                    <input type="text" id="input-busca" placeholder="Pesquisar no AgroHub..." oninput="pesquisarProjetos()">
+                </div>
+                <div class="user-profile-drive">
+                    <div class="user-avatar-drive">R</div>
+                </div>
+            </div>
+
+            <!-- Painel de Projetos -->
+            <div class="projetos-section" id="painel-conteudo">
+                <div class="projetos-header-row">
+                    <h1 id="titulo-secao">Selecione um Projeto</h1>
+                    <div class="ordenacao">
+                        <span>Ordenação:</span>
+                        <strong onclick="alternarOrdenacao()" id="label-ordenacao">Mais novos <i class="fa-solid fa-caret-down"></i></strong>
+                    </div>
+                </div>
+
+                <h2 class="section-title" id="subtitulo-secao">REGISTRO DE BANCO DE DADOS</h2>
+
+                <div class="projetos-grid" id="grid-projetos">
+                    <!-- Preenchido via Script -->
+                </div>
+            </div>
+
+            <!-- Painel de Configurações -->
+            <div class="projetos-section" id="painel-configs" style="display: none;">
+                <div class="projetos-header-row">
+                    <h1>Configurações do Sistema</h1>
+                </div>
+                <div class="config-card">
+                    <h3>Gestão de Base de Dados Local</h3>
+                    <p>Gerencie os registros persistidos no navegador (LocalDB).</p>
+                    <br>
+                    <button onclick="limparBancoDeDados()" class="btn-novo-drive" style="background-color: #dc2626;">
+                        <i class="fa-solid fa-trash"></i> Apagar Todos os Dados e Restaurar Padrões
+                    </button>
+                </div>
+            </div>
+
+            <footer class="footer-institucional-drive">
+                INSTITUTO FEDERAL Catarinense | Campus Camboriú — Bacharelado em Sistemas de Informação (Extensão Universitária II)
+            </footer>
+        </div>
+    </main>
+
+    <!-- SCRIPT DE FUNCIONALIDADE -->
+    <script>
+        function inicializarBanco() {
+            if (!localStorage.getItem('agrohub_projetos')) {
+                const projetosIniciais = [
+                    { id: 1, nome: "projeto_1", data: "15/05/2026", area: "10 hectares", timestamp: Date.now() - 3600000 },
+                    { id: 2, nome: "projeto_2", data: "15/05/2026", area: "10 hectares", timestamp: Date.now() - 7200000 },
+                    { id: 3, nome: "projeto_3", data: "15/05/2026", area: "10 hectares", timestamp: Date.now() - 10800000 },
+                    { id: 4, nome: "projeto_4", data: "15/05/2026", area: "10 hectares", timestamp: Date.now() - 14400000 }
+                ];
+                localStorage.setItem('agrohub_projetos', JSON.stringify(projetosIniciais));
+            }
+        }
+
+        let ordemRecente = true;
+
+        function obterProjetos() {
+            inicializarBanco();
+            return JSON.parse(localStorage.getItem('agrohub_projetos')) || [];
+        }
+
+        function salvarProjetos(projetos) {
+            localStorage.setItem('agrohub_projetos', JSON.stringify(projetos));
+        }
+
+        function renderizarProjetos(lista = null) {
+            const grid = document.getElementById('grid-projetos');
+            const projetos = lista || obterProjetos();
+            grid.innerHTML = '';
+
+            if (projetos.length === 0) {
+                grid.innerHTML = '<p style="color: #78716c; grid-column: 1/-1; padding: 20px;">Nenhum projeto encontrado no banco de dados.</p>';
+                return;
+            }
+
+            projetos.sort((a, b) => ordemRecente ? b.timestamp - a.timestamp : a.timestamp - b.timestamp);
+
+            projetos.forEach(proj => {
+                const card = document.createElement('div');
+                card.className = 'projeto-card';
+                card.innerHTML = `
+                    <div class="card-preview" onclick="window.location.href='projeto.html'">
+                        <span>[Prévia Canteiros 2D]</span>
+                    </div>
+                    <div class="card-info" onclick="window.location.href='projeto.html'">
+                        <h3>${proj.nome}</h3>
+                        <p>Data de criação: ${proj.data}</p>
+                        <p>Área: ${proj.area}</p>
+                    </div>
+                    <div style="padding: 0 16px 12px 16px; text-align: right;">
+                        <button onclick="excluirProjeto(${proj.id})" style="background: none; border: none; color: #dc2626; font-size: 0.75rem; cursor: pointer;">
+                            <i class="fa-solid fa-trash"></i> Excluir
+                        </button>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function abrirModalNovoProjeto() {
+            const nomeInput = prompt("Digite o nome do novo projeto agroflorestal:");
+            if (!nomeInput) return;
+
+            const areaInput = prompt("Digite a área do projeto (ex: 5 hectares):") || "5 hectares";
+            const hoje = new Date().toLocaleDateString('pt-BR');
+
+            const novosProjetos = obterProjetos();
+            novosProjetos.push({
+                id: Date.now(),
+                nome: nomeInput.trim(),
+                data: hoje,
+                area: areaInput.trim(),
+                timestamp: Date.now()
+            });
+            salvarProjetos(novosProjetos);
+            renderizarProjetos();
+        }
+
+        function excluirProjeto(id) {
+            if (confirm("Tem certeza que deseja remover este projeto?")) {
+                let projetos = obterProjetos();
+                projetos = projetos.filter(p => p.id !== id);
+                salvarProjetos(projetos);
+                renderizarProjetos();
+            }
+        }
+
+        function pesquisarProjetos() {
+            const termo = document.getElementById('input-busca').value.toLowerCase();
+            const projetos = obterProjetos();
+            renderizarProjetos(projetos.filter(p => p.nome.toLowerCase().includes(termo)));
+        }
+
+        function alternarOrdenacao() {
+            ordemRecente = !ordemRecente;
+            document.getElementById('label-ordenacao').innerHTML = (ordemRecente ? "Mais novos" : "Mais antigos") + ' <i class="fa-solid fa-caret-down"></i>';
+            renderizarProjetos();
+        }
+
+        function filtrarSecao(secao, event) {
+            if (event) event.preventDefault();
+            document.querySelectorAll('.sidebar-menu-drive a').forEach(a => a.classList.remove('active'));
+            
+            const painelConteudo = document.getElementById('painel-conteudo');
+            const painelConfigs = document.getElementById('painel-configs');
+
+            if (secao === 'todos') {
+                document.getElementById('menu-meus').classList.add('active');
+                document.getElementById('titulo-secao').innerText = "Selecione um Projeto";
+                document.getElementById('subtitulo-secao').innerText = "REGISTRO DE BANCO DE DADOS";
+                painelConteudo.style.display = 'block';
+                painelConfigs.style.display = 'none';
+                renderizarProjetos();
+            } else if (secao === 'recentes') {
+                document.getElementById('menu-recentes').classList.add('active');
+                document.getElementById('titulo-secao').innerText = "Projetos Recentes";
+                document.getElementById('subtitulo-secao').innerText = "MODIFICADOS RECENTEMENTE";
+                painelConteudo.style.display = 'block';
+                painelConfigs.style.display = 'none';
+                
+                const projetos = obterProjetos();
+                projetos.sort((a, b) => b.timestamp - a.timestamp);
+                renderizarProjetos(projetos.slice(0, 2));
+            } else if (secao === 'configuracoes') {
+                document.getElementById('menu-configs').classList.add('active');
+                painelConteudo.style.display = 'none';
+                painelConfigs.style.display = 'block';
+            }
+        }
+
+        function limparBancoDeDados() {
+            if (confirm("Deseja apagar todos os registros do banco de dados local?")) {
+                localStorage.removeItem('agrohub_projetos');
+                inicializarBanco();
+                renderizarProjetos();
+                alert("Banco de dados restaurado!");
+                filtrarSecao('todos');
+            }
+        }
+
+        window.onload = function() {
+            inicializarBanco();
+            renderizarProjetos();
+        };
+    </script>
+</body>
+</html>

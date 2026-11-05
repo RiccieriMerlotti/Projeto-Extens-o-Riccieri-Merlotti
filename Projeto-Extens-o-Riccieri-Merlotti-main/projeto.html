@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AgroHub - Modelagem com Legenda e Controles de Exibição</title>
+    <title>AgroHub - Correção de Limpeza e Modelagem</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style_basico.css">
 </head>
@@ -60,7 +60,7 @@
                 </button>
 
                 <!-- BOTÃO PARA EXIBIR / OCULTAR LEGENDA E MEDIDAS -->
-                <button class="btn-ferramenta" id="btn-ferramenta-rotulos" title="Alternar visibilidade das legendas e medidas" onclick="alternarVisibilidadeRotulos()">
+                <button class="btn-ferramenta" id="btn-ferramenta-rotulos" title="Alternar visibilidade" onclick="alternarVisibilidadeRotulos()">
                     <i class="fa-solid fa-eye-slash" id="icone-btn-rotulos"></i>
                     <span id="txt-btn-rotulos">Ocultar Rótulos</span>
                 </button>
@@ -125,7 +125,6 @@
 
                     <!-- Canteiros Gerados -->
                     <div id="area-canteiros-gerados" class="canteiros-gerados-wrapper" style="display: none;">
-                        <!-- Rótulos colados ao lado da seleção de canteiros -->
                         <div class="medida-borda medida-topo elemento-rotulo" id="canteiro-medida-largura">Largura: --</div>
                         <div class="medida-borda medida-lateral elemento-rotulo" id="canteiro-medida-comprimento">Comprimento: --</div>
                     </div>
@@ -134,7 +133,7 @@
                 <!-- PAINEL DE STATUS FIXADO À DIREITA (~12cm) -->
                 <div class="painel-status-direita" id="label-escala-terreno">
                     <i class="fa-solid fa-circle-info"></i>
-                    <span>Selecione a área no terreno. Clique em 'Ocultar Rótulos' na barra lateral para esconder as legendas e medidas.</span>
+                    <span>Selecione a área no terreno. Arraste para desenhar o novo canteiro.</span>
                 </div>
             </div>
         </div>
@@ -189,13 +188,13 @@
         </footer>
     </main>
 
-    <!-- SCRIPT DE LÓGICA E INTERAÇÃO -->
+    <!-- SCRIPT CORRIGIDO COM LIMPEZA COMPLETA DE ESTADOS -->
     <script>
         let modoAtual = 'terreno';
         let unidadeEscala = 'm';
         let distLinhaPrincipalMetros = 5.0;
         let nivelZoom = 1.0;
-        let rotulosVisiveis = true; // Controle de exibição
+        let rotulosVisiveis = true;
         
         let movendoCampo = false;
         let inicioPanX = 0, inicioPanY = 0;
@@ -266,13 +265,15 @@
         }
 
         function iniciarAcaoMouse(e) {
+            if (canteirosGerados) return; // Impede desenhar novo terreno se já houver canteiros gerados até limpar
+
             if (modoAtual === 'mover' || e.button === 2 || e.altKey) {
                 movendoCampo = true;
                 inicioPanX = e.clientX - deslocamentoX;
                 inicioPanY = e.clientY - deslocamentoY;
                 document.getElementById('viewport-terreno').style.cursor = 'grabbing';
                 e.preventDefault();
-            } else if (modoAtual === 'terreno' && !canteirosGerados) {
+            } else if (modoAtual === 'terreno') {
                 const plano = document.getElementById('plano-terreno');
                 const rect = plano.getBoundingClientRect();
                 
@@ -392,10 +393,6 @@
             containerCanteiros.style.height = `${areaSelecionada.altura}px`;
             containerCanteiros.style.display = 'flex';
 
-            // Atualiza os rótulos de medida colados à área de canteiros
-            document.getElementById('canteiro-medida-largura').innerText = `Largura: ${larguraMetros.toFixed(1)} ${unidadeEscala}`;
-            document.getElementById('canteiro-medida-comprimento').innerText = `Comprimento: ${alturaMetros.toFixed(1)} ${unidadeEscala}`;
-
             const larguraTotal = areaSelecionada.largura - 10;
             const alturaTotal = areaSelecionada.altura - 10;
 
@@ -438,7 +435,7 @@
                 }
             }
 
-            // Preserva as divs estáticas dos rótulos e anexa o conteúdo gerado
+            // Constrói o HTML preservando os rótulos de medida estruturais
             let htmlModulos = `
                 <div class="medida-borda medida-topo elemento-rotulo" id="canteiro-medida-largura">Largura: ${larguraMetros.toFixed(1)} ${unidadeEscala}</div>
                 <div class="medida-borda medida-lateral elemento-rotulo" id="canteiro-medida-comprimento">Comprimento: ${alturaMetros.toFixed(1)} ${unidadeEscala}</div>
@@ -449,7 +446,7 @@
 
                 if (eColunaPrincipal) {
                     htmlModulos += `
-                        <div class="canteiro-coluna canteiro-principal" title="Linha Principal (Largura: 0.8m | Comp: ${alturaMetros.toFixed(1)}m)">
+                        <div class="canteiro-coluna canteiro-principal" title="Linha Principal (0.8m)">
                             <span class="info-medida-canteiro">0.8m</span>
                     `;
                     for (let row = 0; row < slotsVerticais; row++) {
@@ -461,10 +458,10 @@
                     htmlModulos += `</div>`;
                 } else {
                     htmlModulos += `
-                        <div class="caminho-circulacao" title="Caminho / Espaço entre canteiros (35cm)">
+                        <div class="caminho-circulacao" title="Caminho (35cm)">
                             <span class="info-medida-caminho">35cm</span>
                         </div>
-                        <div class="canteiro-coluna canteiro-secundario" title="Canteiro Secundário (Largura: 0.75m | Comp: ${alturaMetros.toFixed(1)}m)">
+                        <div class="canteiro-coluna canteiro-secundario" title="Canteiro Secundário (0.75m)">
                             <span class="info-medida-canteiro">0.75m</span>
                     `;
                     for (let row = 0; row < slotsVerticais; row++) {
@@ -475,7 +472,7 @@
                     }
                     htmlModulos += `</div>`;
                     htmlModulos += `
-                        <div class="caminho-circulacao" title="Caminho / Espaço entre canteiros (35cm)">
+                        <div class="caminho-circulacao" title="Caminho (35cm)">
                             <span class="info-medida-caminho">35cm</span>
                         </div>
                     `;
@@ -485,20 +482,31 @@
             containerCanteiros.innerHTML = htmlModulos;
             document.getElementById('retangulo-paint').style.display = 'none';
 
-            // Garante o estado atual de exibição definido pelo botão
             if (!rotulosVisiveis) {
                 document.querySelectorAll('.elemento-rotulo, .info-medida-canteiro, .info-medida-caminho').forEach(el => el.style.display = 'none');
             }
 
-            atualizarPainel(`Layout gerado: ${totalPlantas} plantas com medidas coladas e legendas ativas.`);
+            atualizarPainel(`Layout gerado: ${totalPlantas} plantas. Medidas e canteiros aplicados.`);
         }
 
+        // FUNÇÃO LIMPAR ÁREA TOTALMENTE CORRIGIDA E RESETADA
         function limparArea() {
             areaDefinida = false;
             canteirosGerados = false;
-            document.getElementById('retangulo-paint').style.display = 'none';
-            document.getElementById('area-canteiros-gerados').style.display = 'none';
-            document.getElementById('area-canteiros-gerados').innerHTML = '';
+            areaSelecionada = { x: 0, y: 0, largura: 0, altura: 0 };
+            
+            const retangulo = document.getElementById('retangulo-paint');
+            retangulo.style.display = 'none';
+            retangulo.style.width = '0px';
+            retangulo.style.height = '0px';
+
+            const containerCanteiros = document.getElementById('area-canteiros-gerados');
+            containerCanteiros.style.display = 'none';
+            containerCanteiros.innerHTML = `
+                <div class="medida-borda medida-topo elemento-rotulo" id="canteiro-medida-largura">Largura: --</div>
+                <div class="medida-borda medida-lateral elemento-rotulo" id="canteiro-medida-comprimento">Comprimento: --</div>
+            `;
+
             atualizarPainel("Área limpa. Selecione um novo terreno arrastando o mouse.");
         }
 

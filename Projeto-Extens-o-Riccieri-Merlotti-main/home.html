@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgroHub - Meus Projetos</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style_basico.css">
+    <style>
+        /* Ajustes específicos para a tela de listagem estilo Drive */
+        .drive-container {
+            display: flex;
+            height: calc(100vh - 48px);
+            background-color: #097412d0;
+            color: #f5f5f5;
+        }
+
+        /* Barra Lateral Esquerda tipo Drive */
+        .drive-sidebar {
+            width: 240px;
+            background-color: #261c14;
+            border-right: 1px solid #4a3528;
+            padding: 20px 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            flex-shrink: 0;
+        }
+
+        .btn-novo-projeto {
+            background-color: #047857;
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 24px;
+            font-weight: bold;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            transition: background 0.2s;
+        }
+
+        .btn-novo-projeto:hover {
+            background-color: #059669;
+        }
+
+        .drive-menu-links {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .drive-menu-links a {
+            color: #d1d5db;
+            text-decoration: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: background 0.2s;
+        }
+
+        .drive-menu-links a:hover, .drive-menu-links a.ativo {
+            background-color: rgba(5, 150, 105, 0.2);
+            color: #34d399;
+        }
+
+        /* Área Principal de Conteúdo */
+        .drive-main-content {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .drive-header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .drive-search-bar {
+            position: relative;
+            width: 350px;
+        }
+
+        .drive-search-bar input {
+            width: 100%;
+            padding: 8px 12px 8px 36px;
+            background-color: #f7f7f7;
+            border: 1px solid #6b4c3b;
+            border-radius: 8px;
+            color: white;
+            font-size: 0.85rem;
+            outline: none;
+        }
+
+        .drive-search-bar input::placeholder {
+            color: #b0a399;
+        }
+
+        .drive-search-bar i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #b0a399;
+        }
+
+        .drive-titulo-secao {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #34d399;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Grade de Projetos em Cartões Estilo Drive */
+        .projetos-grid-drive {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 20px;
+        }
+
+        .projeto-card-drive {
+            background-color: #3f2c21;
+            border: 1px solid #573e30;
+            border-radius: 10px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.2s, border-color 0.2s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+        }
+
+        .projeto-card-drive:hover {
+            transform: translateY(-3px);
+            border-color: #059669;
+        }
+
+        .projeto-card-thumb {
+            height: 120px;
+            background-color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #8c6d59;
+            font-size: 2rem;
+            border-bottom: 1px solid #573e30;
+        }
+
+        .projeto-card-info {
+            padding: 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .projeto-card-titulo {
+            font-size: 0.95rem;
+            font-weight: bold;
+            color: #ffffff;
+            text-decoration: none;
+        }
+
+        .projeto-card-titulo:hover {
+            color: #34d399;
+        }
+
+        .projeto-card-detalhes {
+            font-size: 0.75rem;
+            color: #b0a399;
+        }
+
+        .projeto-card-footer {
+            padding: 10px 14px;
+            border-top: 1px solid #4a3528;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .btn-acao-card {
+            background: none;
+            border: none;
+            color: #ef4444;
+            font-size: 0.75rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .btn-acao-card:hover {
+            color: #f87171;
+        }
+
+        .btn-abrir-card {
+            color: #34d399;
+            text-decoration: none;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+
+        .btn-abrir-card:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body class="pagina-construcao">
+
+    <!-- MENU DE NAVEGAÇÃO SUPERIOR -->
+    <header class="topo-nav">
+        <div class="logo-area">
+            <i class="fa-solid fa-seedling"></i>
+            <span>AgroHub <small>IFC Camboriú</small></span>
+        </div>
+        <div class="nav-botoes">
+            <a href="index.html" class="ativo"><i class="fa-solid fa-folder-open"></i> Meus Projetos</a>
+            <a href="projeto.html"><i class="fa-solid fa-hammer"></i> Construção / Modelagem</a>
+        </div>
+    </header>
+
+    <!-- CONTAINER PRINCIPAL ESTILO DRIVE -->
+    <div class="drive-container">
+        
+        <!-- BARRA LATERAL -->
+        <aside class="drive-sidebar">
+            <button class="btn-novo-projeto" onclick="criarNovoProjeto()">
+                <i class="fa-solid fa-plus"></i> Novo Projeto
+            </button>
+
+            <div class="drive-menu-links">
+                <a href="#" class="ativo"><i class="fa-solid fa-folder"></i> Meus Projetos</a>
+                <a href="#"><i class="fa-solid fa-clock-rotate-left"></i> Recentes</a>
+                <a href="#"><i class="fa-solid fa-gear"></i> Configurações</a>
+            </div>
+        </aside>
+
+        <!-- CONTEÚDO PRINCIPAL -->
+        <main class="drive-main-content">
+            <div class="drive-header-top">
+                <div class="drive-search-bar">
+                    <i class="fa-solid fa-search"></i>
+                    <input type="text" placeholder="Pesquisar no AgroHub..." id="input-busca-projetos">
+                </div>
+            </div>
+
+            <div class="drive-titulo-secao">
+                <span>Seleccione um Projeto</span>
+                <span style="font-size: 0.8rem; color: #b0a399; font-weight: normal;">Ordenação: Mais novos <i class="fa-solid fa-chevron-down"></i></span>
+            </div>
+
+            <!-- GRADE DE PROJETOS -->
+            <div class="projetos-grid-drive" id="grid-projetos">
+                <!-- Projeto 1 -->
+                <div class="projeto-card-drive">
+                    <div class="projeto-card-thumb"><i class="fa-solid fa-seedling"></i></div>
+                    <div class="projeto-card-info">
+                        <a href="projeto.html" class="projeto-card-titulo">projeto_1</a>
+                        <span class="projeto-card-detalhes">Criação: 15/05/2026</span>
+                        <span class="projeto-card-detalhes">Área: 10 hectares</span>
+                    </div>
+                    <div class="projeto-card-footer">
+                        <a href="projeto.html" class="btn-abrir-card">Abrir Modelagem &gt;</a>
+                        <button class="btn-acao-card" onclick="excluirProjeto('projeto_1')"><i class="fa-solid fa-trash"></i> Excluir</button>
+                    </div>
+                </div>
+
+                <!-- Projeto 2 -->
+                <div class="projeto-card-drive">
+                    <div class="projeto-card-thumb"><i class="fa-solid fa-tree"></i></div>
+                    <div class="projeto-card-info">
+                        <a href="projeto.html" class="projeto-card-titulo">projeto_2</a>
+                        <span class="projeto-card-detalhes">Criação: 15/05/2026</span>
+                        <span class="projeto-card-detalhes">Área: 10 hectares</span>
+                    </div>
+                    <div class="projeto-card-footer">
+                        <a href="projeto.html" class="btn-abrir-card">Abrir Modelagem &gt;</a>
+                        <button class="btn-acao-card" onclick="excluirProjeto('projeto_2')"><i class="fa-solid fa-trash"></i> Excluir</button>
+                    </div>
+                </div>
+
+                <!-- Projeto 3 -->
+                <div class="projeto-card-drive">
+                    <div class="projeto-card-thumb"><i class="fa-solid fa-wheat-awn"></i></div>
+                    <div class="projeto-card-info">
+                        <a href="projeto.html" class="projeto-card-titulo">projeto_3</a>
+                        <span class="projeto-card-detalhes">Criação: 15/05/2026</span>
+                        <span class="projeto-card-detalhes">Área: 10 hectares</span>
+                    </div>
+                    <div class="projeto-card-footer">
+                        <a href="projeto.html" class="btn-abrir-card">Abrir Modelagem &gt;</a>
+                        <button class="btn-acao-card" onclick="excluirProjeto('projeto_3')"><i class="fa-solid fa-trash"></i> Excluir</button>
+                    </div>
+                </div>
+
+                <!-- Projeto 4 -->
+                <div class="projeto-card-drive">
+                    <div class="projeto-card-thumb"><i class="fa-solid fa-map"></i></div>
+                    <div class="projeto-card-info">
+                        <a href="projeto.html" class="projeto-card-titulo">projeto_4</a>
+                        <span class="projeto-card-detalhes">Criação: 15/05/2026</span>
+                        <span class="projeto-card-detalhes">Área: 10 hectares</span>
+                    </div>
+                    <div class="projeto-card-footer">
+                        <a href="projeto.html" class="btn-abrir-card">Abrir Modelagem &gt;</a>
+                        <button class="btn-acao-card" onclick="excluirProjeto('projeto_4')"><i class="fa-solid fa-trash"></i> Excluir</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        function criarNovoProjeto() {
+            const nome = prompt("Digite o nome do novo projeto agroflorestal:");
+            if (nome) {
+                alert(`Projeto "${nome}" criado com sucesso! Redirecionando para modelagem...`);
+                window.location.href = "projeto.html";
+            }
+        }
+
+        function excluirProjeto(nome) {
+            if (confirm(`Deseja realmente excluir o projeto ${nome}?`)) {
+                alert(`Projeto ${nome} excluído.`);
+            }
+        }
+    </script>
+</body>
+</html>
